@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Todo — a small, focused task list</title>
+    <meta
+      name="description"
+      content="A dependency-free todo list: add, edit, filter and clear tasks, with offline persistence in your browser."
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script>
+      /* Resolve the theme before first paint so there is no flash of the wrong colours. */
+      (function () {
+        var theme = 'light';
+        try {
+          var stored = window.localStorage.getItem('cline-todo.theme');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          theme = stored === 'dark' || stored === 'light' ? stored : prefersDark ? 'dark' : 'light';
+        } catch (error) {
+          /* Storage can throw in private modes; the light default is fine. */
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#todo-input">Skip to the task input</a>
+
+    <main class="app" id="app">
+      <header class="app__header">
+        <div class="app__heading">
+          <h1 class="app__title">Todo</h1>
+          <p class="app__status" id="status-line">Nothing on your list yet.</p>
+        </div>
+        <button
+          type="button"
+          class="btn btn--ghost btn--icon"
+          id="theme-toggle"
+          aria-pressed="false"
+          title="Toggle dark mode"
+        >
+          <span aria-hidden="true" id="theme-icon">🌙</span>
+          <span class="sr-only" id="theme-label">Switch to dark theme</span>
+        </button>
+      </header>
+
+      <div
+        class="progress"
+        id="progress"
+        role="progressbar"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="0"
+        aria-labelledby="status-line"
+      >
+        <div class="progress__bar" id="progress-bar"></div>
+      </div>
+
+      <form class="composer" id="todo-form" autocomplete="off" novalidate>
+        <label class="sr-only" for="todo-input">Add a task</label>
+        <div class="composer__row">
+          <input
+            class="composer__input"
+            id="todo-input"
+            name="task"
+            type="text"
+            placeholder="What needs to be done?"
+            maxlength="200"
+            aria-describedby="input-hint"
+          />
+          <button class="btn btn--primary" type="submit" id="add-button">Add task</button>
+        </div>
+        <p class="composer__error" id="input-error" role="alert" hidden></p>
+        <p class="sr-only" id="input-hint">Type a task and press Enter to add it to the list.</p>
+      </form>
+      <section class="toolbar" aria-label="List controls">
+        <label class="toggle-all">
+          <input class="checkbox__input" type="checkbox" id="toggle-all" />
+          <span class="checkbox__box" aria-hidden="true"></span>
+          <span class="toggle-all__text">Mark all as complete</span>
+        </label>
+
+        <div class="filters" id="filters" role="group" aria-label="Filter tasks">
+          <button type="button" class="filter is-active" data-filter="all" aria-pressed="true">
+            All <span class="filter__count" data-count="all">0</span>
+          </button>
+          <button type="button" class="filter" data-filter="active" aria-pressed="false">
+            Active <span class="filter__count" data-count="active">0</span>
+          </button>
+          <button type="button" class="filter" data-filter="completed" aria-pressed="false">
+            Completed <span class="filter__count" data-count="completed">0</span>
+          </button>
+        </div>
+
+        <button type="button" class="btn btn--ghost" id="clear-completed" disabled>Clear completed</button>
+      </section>
+
+      <h2 class="sr-only" id="list-heading">Your tasks</h2>
+      <ul class="todo-list" id="todo-list" aria-labelledby="list-heading"></ul>
+      <p class="empty" id="empty-state" hidden>Your list is empty. Add your first task above.</p>
+
+      <p class="app__hint" id="app-hint">
+        Double-click a task&rsquo;s text (or use the pencil) to rename it &middot; Enter saves &middot; Esc cancels.
+      </p>
+
+      <p class="sr-only" id="live-region" role="status" aria-live="polite" aria-atomic="true"></p>
+
+      <template id="todo-item-template">
+        <li class="todo-item" tabindex="-1">
+          <label class="checkbox">
+            <input class="checkbox__input todo-item__toggle" type="checkbox" />
+            <span class="checkbox__box" aria-hidden="true"></span>
+            <span class="sr-only">Mark task as complete</span>
+          </label>
+          <span class="todo-item__label"></span>
+          <input class="todo-item__edit" type="text" maxlength="200" aria-label="Edit task text" />
+          <span class="todo-item__actions">
+            <button type="button" class="btn-icon" data-action="edit" aria-label="Edit task" title="Edit task">
+              <span aria-hidden="true">✎</span>
+            </button>
+            <button type="button" class="btn-icon btn-icon--danger" data-action="delete" aria-label="Delete task" title="Delete task">
+              <span aria-hidden="true">✕</span>
+            </button>
+          </span>
+        </li>
+      </template>
+    </main>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
